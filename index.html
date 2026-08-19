@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Web - Premium UI</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: #0b0f19; color: #f8fafc; padding: 0 0 40px 0; }
+        
+        /* Hero Section */
+        .header { background: linear-gradient(180deg, #1e1b4b 0%, #0b0f19 100%); padding: 60px 20px 40px; text-align: center; border-bottom: 1px solid #1e293b; }
+        h1 { font-size: 3rem; font-weight: 700; margin-bottom: 15px; background: -webkit-linear-gradient(45deg, #f43f5e, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: #94a3b8; font-size: 1.1rem; margin-bottom: 30px; }
+        
+        /* Buscador */
+        .search-box { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        input { padding: 15px 20px; font-size: 16px; border-radius: 30px; border: 1px solid #334155; background-color: rgba(30, 41, 59, 0.7); color: white; width: 100%; outline: none; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+        input:focus { border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+        .btn-buscar { padding: 15px 30px; font-size: 16px; border-radius: 30px; border: none; background: linear-gradient(90deg, #f43f5e 0%, #e11d48 100%); color: white; cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn-buscar:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(244, 63, 94, 0.4); }
+
+        /* Categorías (Filtros) */
+        .categories { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .cat-btn { background-color: rgba(30, 41, 59, 0.6); color: #cbd5e1; border: 1px solid #334155; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; backdrop-filter: blur(5px); }
+        .cat-btn:hover { background-color: #8b5cf6; color: white; border-color: #8b5cf6; transform: translateY(-2px); }
+
+        /* Contenedor Principal */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Reproductor Modal */
+        #player-section { display: none; margin: 40px auto; background: rgba(30, 41, 59, 0.8); padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #334155; backdrop-filter: blur(15px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); max-width: 900px; }
+        #player-title { margin-bottom: 20px; font-size: 1.8rem; }
+        #video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        video { width: 100%; height: 100%; object-fit: contain; }
+        #episodios { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        .ep-btn { background-color: #334155; color: white; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        .ep-btn:hover { background-color: #8b5cf6; }
+        #estado { color: #fbbf24; font-weight: 600; margin-bottom: 15px; font-size: 1.1rem; }
+        .btn-cerrar { margin-top:20px; background: transparent; border: 2px solid #ef4444; color: #ef4444; padding: 10px 25px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .btn-cerrar:hover { background: #ef4444; color: white; }
+
+        /* Grid de Directorio */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; margin-top: 20px; }
+        
+        /* Tarjetas de Anime */
+        .card { background-color: #1e293b; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid #334155; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.4); border-color: #64748b; }
+        
+        .card-img-wrapper { position: relative; width: 100%; height: 350px; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Gradiente oscuro sobre la imagen para legibilidad */
+        .card-img-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; background: linear-gradient(to top, #1e293b 10%, transparent 100%); }
+        
+        /* Badges (Etiquetas sobre la imagen) */
+        .badges { position: absolute; top: 15px; left: 15px; display: flex; gap: 8px; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
+        .badge-year { background-color: rgba(0, 0, 0, 0.6); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .badge-status { background-color: rgba(139, 92, 246, 0.8); color: white; }
+
+        .card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; background-color: #1e293b; position: relative; z-index: 2; margin-top: -30px; }
+        .card-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 15px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .play-btn { margin-top: auto; background: rgba(255, 255, 255, 0.05); color: #f8fafc; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .play-btn:hover { background: #8b5cf6; border-color: #8b5cf6; color: white; }
+        .play-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+        /* Loader */
+        .loader-text { text-align: center; grid-column: 1 / -1; color: #94a3b8; font-size: 1.2rem; padding: 40px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>NexoAnime</h1>
+        <p class="subtitle">Explora y reproduce tus series favoritas al instante</p>
+        
+        <div class="search-box">
+            <input type="text" id="busqueda" placeholder="Buscar por título (ej. Jujutsu, Solo Leveling)...">
+            <button class="btn-buscar" onclick="buscarPorTexto()">Buscar</button>
+        </div>
+
+        <div class="categories">
+            <button class="cat-btn" onclick="cargarDirectorio('trending')">🔥 Tendencias</button>
+            <button class="cat-btn" onclick="cargarDirectorio('action')">⚔️ Acción</button>
+            <button class="cat-btn" onclick="cargarDirectorio('romance')">❤️ Romance</button>
+            <button class="cat-btn" onclick="cargarDirectorio('comedy')">😂 Comedia</button>
+            <button class="cat-btn" onclick="cargarDirectorio('horror')">👻 Terror</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Sección del Reproductor -->
+        <div id="player-section">
+            <h2 id="player-title">Reproductor</h2>
+            <div id="estado"></div>
+            <div id="video-container">
+                <video id="reproductor" controls></video>
+            </div>
+            <div id="episodios"></div>
+            <button class="btn-cerrar" onclick="cerrarReproductor()">Cerrar Reproductor</button>
+        </div>
+
+        <!-- Directorio Grid -->
+        <div class="grid" id="galeria"></div>
+    </div>
+
+    <script>
+        const API_KITSU = 'https://kitsu.io/api/edge/anime';
+        const API_STREAM = 'https://api.consumet.org/anime/gogoanime';
+
+        async function cargarDirectorio(filtro = 'trending') {
+            const galeria = document.getElementById('galeria');
+            galeria.innerHTML = '<div class="loader-text">Cargando catálogo...</div>';
+            
+            let url = filtro === 'trending' 
+                ? `${API_KITSU}?sort=-userCount&page[limit]=12`
+                : `${API_KITSU}?filter[categories]=${filtro}&sort=-userCount&page[limit]=12`;
+
+            try {
+                const res = await fetch(url, { headers: { 'Accept': 'application/vnd.api+json' }});
+                const datos = await res.json();
+                renderizarGaleria(datos.data);
+            } catch (error) {
+                galeria.innerHTML = '<div class="loader-text">Error al cargar el catálogo.</div>';
+            }
+        }
+
+        async function buscarPorTexto() {
+            const query = document.getElementById('busqueda').value.trim();
+            if(!query) return;
+            const galeria = document.getElementById('galeria');
+            galeria.innerHTML = '<div class="loader-text">Buscando...</div>';
+            const url = `${API_KITSU}?filter[text]=${encodeURIComponent(query)}&page[limit]=12`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/vnd.api+json' }});
+            const datos = await res.json();
+            renderizarGaleria(datos.data);
+        }
+
+        function renderizarGaleria(animes) {
+            const galeria = document.getElementById('galeria');
+            galeria.innerHTML = '';
+            
+            if(animes.length === 0) {
+                galeria.innerHTML = '<div class="loader-text">No se encontraron resultados.</div>';
+                return;
+            }
+            
+            animes.forEach(anime => {
+                const attr = anime.attributes;
+                const titulo = attr.canonicalTitle || 'Desconocido';
+                const imagen = attr.posterImage ? attr.posterImage.medium : 'https://via.placeholder.com/220x320';
+                const anio = attr.startDate ? attr.startDate.substring(0,4) : 'N/A';
+                const status = attr.status === 'finished' ? 'Finalizado' : 'Emisión';
+
+                // Icono SVG de Play para el botón
+                const playIcon = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card';
+                tarjeta.innerHTML = `
+                    <div class="card-img-wrapper">
+                        <img src="${imagen}" alt="${titulo}" loading="lazy">
+                        <div class="card-img-overlay"></div>
+                        <div class="badges">
+                            <span class="badge badge-year">${anio}</span>
+                            <span class="badge badge-status">${status}</span>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">${titulo}</div>
+                        <button class="play-btn" onclick="abrirStreaming('${titulo}')">
+                            ${playIcon} Reproducir
+                        </button>
+                    </div>
+                `;
+                galeria.appendChild(tarjeta);
+            });
+        }
+
+        async function abrirStreaming(titulo) {
+            document.getElementById('player-section').style.display = 'block';
+            document.getElementById('player-title').innerText = `Buscando episodios para: ${titulo}...`;
+            const estado = document.getElementById('estado');
+            const divEpisodios = document.getElementById('episodios');
+            
+            estado.innerText = 'Conectando con el servidor de streaming...';
+            divEpisodios.innerHTML = '';
+            document.getElementById('video-container').style.display = 'none';
+            
+            // Scroll suave hacia el reproductor
+            document.getElementById('player-section').scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                const queryLimpio = titulo.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+                const res = await fetch(`${API_STREAM}/${queryLimpio}`);
+                const datos = await res.json();
+
+                if (!datos.results || datos.results.length === 0) {
+                    estado.innerText = 'No se encontraron enlaces de video para este anime.';
+                    return;
+                }
+
+                const animeId = datos.results[0].id;
+                const resDetalles = await fetch(`${API_STREAM}/info/${animeId}`);
+                const datosDetalles = await resDetalles.json();
+
+                estado.innerText = '¡Episodios encontrados! Selecciona uno:';
+                document.getElementById('player-title').innerText = datosDetalles.title;
+
+                datosDetalles.episodes.forEach(ep => {
+                    const btn = document.createElement('button');
+                    btn.className = 'ep-btn';
+                    btn.innerText = `Ep ${ep.number}`;
+                    btn.onclick = () => reproducirEpisodio(ep.id);
+                    divEpisodios.appendChild(btn);
+                });
+
+            } catch (error) {
+                estado.innerText = 'Error CORS local. Este mensaje desaparecerá cuando subas la página a tu hosting online.';
+                console.error(error);
+            }
+        }
+
+        async function reproducirEpisodio(episodioId) {
+            const estado = document.getElementById('estado');
+            const video = document.getElementById('reproductor');
+            const contenedor = document.getElementById('video-container');
+
+            estado.innerText = 'Cargando stream...';
+
+            try {
+                const res = await fetch(`${API_STREAM}/watch/${episodioId}`);
+                const datos = await res.json();
+                const fuente = datos.sources.find(src => src.quality === 'default' || src.quality === 'auto') || datos.sources[0];
+
+                contenedor.style.display = 'block';
+                estado.innerText = 'Reproduciendo...';
+
+                if (Hls.isSupported()) {
+                    const hls = new Hls();
+                    hls.loadSource(fuente.url);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = fuente.url;
+                    video.addEventListener('loadedmetadata', () => video.play());
+                }
+            } catch (error) {
+                estado.innerText = 'Error al cargar el archivo de video.';
+            }
+        }
+
+        function cerrarReproductor() {
+            document.getElementById('player-section').style.display = 'none';
+            document.getElementById('reproductor').pause();
+        }
+
+        window.onload = () => cargarDirectorio('trending');
+    </script>
+</body>
+</html>
