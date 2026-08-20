@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -221,7 +220,7 @@
                 });
 
             } catch (error) {
-                estado.innerText = 'Error CORS local. Este mensaje desaparecerá cuando subas la página a tu hosting online.';
+                estado.innerText = 'Asegúrate de que el archivo _redirects esté correctamente configurado en la raíz de tu proyecto.';
                 console.error(error);
             }
         }
